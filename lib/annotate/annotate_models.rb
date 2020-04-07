@@ -128,16 +128,19 @@ module AnnotateModels
       bare_type_allowance = 16
 
       if options[:format_markdown]
-        info << sprintf( "# %-#{max_size + md_names_overhead}.#{max_size + md_names_overhead}s | %-#{md_type_allowance}.#{md_type_allowance}s | %s\n", 'Name', 'Type', 'Attributes' )
-        info << "# #{ '-' * ( max_size + md_names_overhead ) } | #{'-' * md_type_allowance} | #{ '-' * 27 }\n"
+        info << sprintf( "# %-#{max_size + md_names_overhead}.#{max_size + md_names_overhead}s | %-#{md_type_allowance}.#{md_type_allowance}s | %s\n", 'Name', 'Type', 'Attributes', 'Comment' )
+        info << "# #{ '-' * ( max_size + md_names_overhead ) } | #{'-' * md_type_allowance} | #{ '-' * 27 } | #{ '-' * 27 }\n"
       end
 
       cols = columns(klass, options)
       cols.each do |col|
         col_type = get_col_type(col)
         attrs = get_attributes(col, col_type, klass, options)
+        comment = ""
         col_name = if with_comments?(klass, options) && col.comment
-                     "#{col.name}(#{col.comment.gsub(/\n/, "\\n")})"
+                     # "#{col.name}(#{col.comment.gsub(/\n/, "\\n")})"
+                     comment = col.comment.gsub(/\n/, "\\n")
+                     col.name
                    else
                      col.name
                    end
@@ -151,7 +154,7 @@ module AnnotateModels
         elsif options[:format_markdown]
           name_remainder = max_size - col_name.length - non_ascii_length(col_name)
           type_remainder = (md_type_allowance - 2) - col_type.length
-          info << (sprintf("# **`%s`**%#{name_remainder}s | `%s`%#{type_remainder}s | `%s`", col_name, " ", col_type, " ", attrs.join(", ").rstrip)).gsub('``', '  ').rstrip + "\n"
+          info << (sprintf("# **`%s`**%#{name_remainder}s | `%s`%#{type_remainder}s | `%s` | `%s`", col_name, " ", col_type, " ", attrs.join(", ").rstrip, comment.rstrip)).gsub('``', '  ').rstrip + "\n"
         else
           info << format_default(col_name, max_size, col_type, bare_type_allowance, attrs)
         end
