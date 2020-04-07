@@ -125,11 +125,12 @@ module AnnotateModels
       max_size = max_schema_info_width(klass, options)
       md_names_overhead = 6
       md_type_allowance = 18
+      comment_allowance = 18
       bare_type_allowance = 16
 
       if options[:format_markdown]
-        info << sprintf( "# %-#{max_size + md_names_overhead}.#{max_size + md_names_overhead}s | %-#{md_type_allowance}.#{md_type_allowance}s | %-#{md_type_allowance}.#{md_type_allowance}s | %s\n", 'Name', 'Type', 'Comment', 'Attributes' )
-        info << "# #{ '-' * ( max_size + md_names_overhead ) } | #{'-' * md_type_allowance} | #{ '-' * 27 } | #{ '-' * 27 }\n"
+        info << sprintf( "# %-#{max_size + md_names_overhead}.#{max_size + md_names_overhead}s | %-#{md_type_allowance}.#{md_type_allowance}s | %-#{comment_allowance}.#{comment_allowance}s | %s\n", 'Name', 'Type', 'Comment', 'Attributes' )
+        info << "# #{ '-' * ( max_size + md_names_overhead ) } | #{'-' * md_type_allowance} | #{'-' * comment_allowance} | #{ '-' * 27 }\n"
       end
 
       cols = columns(klass, options)
@@ -154,7 +155,8 @@ module AnnotateModels
         elsif options[:format_markdown]
           name_remainder = max_size - col_name.length - non_ascii_length(col_name)
           type_remainder = (md_type_allowance - 2) - col_type.length
-          info << (sprintf("# **`%s`**%#{name_remainder}s | `%s`%#{type_remainder}s | `%s`%#{type_remainder}s | `%s`", col_name, " ", col_type, " ", comment.rstrip, " ", attrs.join(", ").rstrip)).gsub('``', '  ').rstrip + "\n"
+          comment_remainder = (comment_allowance - 2) - comment.length
+          info << (sprintf("# **`%s`**%#{name_remainder}s | `%s`%#{type_remainder}s | `%s`%#{comment_remainder}s | `%s`", col_name, " ", col_type, " ", comment.rstrip, " ", attrs.join(", ").rstrip)).gsub('``', '  ').rstrip + "\n"
         else
           info << format_default(col_name, max_size, col_type, bare_type_allowance, attrs)
         end
